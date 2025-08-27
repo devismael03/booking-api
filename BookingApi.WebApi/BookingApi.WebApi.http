@@ -1,0 +1,13 @@
+@BookingApi.WebApi_HostAddress = https://localhost:7071
+
+# Get all weather forecasts
+GET {{BookingApi.WebApi_HostAddress}}/api/weatherforecast
+Accept: application/json
+
+###
+
+# Access Swagger UI
+GET {{BookingApi.WebApi_HostAddress}}/swagger
+Accept: text/html
+
+###
