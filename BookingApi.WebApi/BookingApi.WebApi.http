@@ -1,7 +1,7 @@
 @BookingApi.WebApi_HostAddress = https://localhost:7071
 
-# Get all weather forecasts
-GET {{BookingApi.WebApi_HostAddress}}/api/weatherforecast
+# Get available homes
+GET {{BookingApi.WebApi_HostAddress}}/api/available-homes
 Accept: application/json
 
 ###

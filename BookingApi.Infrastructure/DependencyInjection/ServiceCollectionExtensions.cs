@@ -9,14 +9,14 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services)
     {
-        services.AddSingleton<IWeatherForecastRepository, InMemoryWeatherForecastRepository>();
+        services.AddSingleton<IHomeRepository, InMemoryHomeRepository>();
 
         return services;
     }
 
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
-        services.AddScoped<IWeatherForecastApplicationService, WeatherForecastApplicationService>();
+        services.AddScoped<IHomeApplicationService, HomeApplicationService>();
 
         return services;
     }
