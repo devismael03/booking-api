@@ -1,11 +1,15 @@
 using BookingApi.Application.DTOs;
 using BookingApi.Application.Interfaces;
+using BookingApi.Application.DataStructures;
 
 namespace BookingApi.Application.Services;
 
 public class HomeApplicationService : IHomeApplicationService
 {
     private readonly IHomeRepository _homeRepository;
+    private IntervalTree? _intervalTree;
+    private Dictionary<string, Domain.Entities.Home>? _homesCache;
+    private bool _isTreeInitialized = false;
 
     public HomeApplicationService(IHomeRepository homeRepository)
     {
@@ -14,9 +18,17 @@ public class HomeApplicationService : IHomeApplicationService
 
     public async Task<AvailableHomesResponseDto> GetAvailableHomesAsync(DateOnly startDate, DateOnly endDate)
     {
-        var allHomes = await _homeRepository.GetAllAsync();
+        if (!_isTreeInitialized)
+        {
+            await InitializeIntervalTree();
+        }
+
+        var availableHomeIds = _intervalTree!.SearchHomeIds(startDate, endDate);
         
-        var filteredHomes = allHomes.Where(home => IsHomeAvailableForDateRange(home, startDate, endDate));
+        var filteredHomes = availableHomeIds
+            .Where(homeId => _homesCache!.ContainsKey(homeId))
+            .Select(homeId => _homesCache![homeId])
+            .ToList();
         
         var homeDtos = filteredHomes.Select(MapToDto).ToList();
         
@@ -27,20 +39,57 @@ public class HomeApplicationService : IHomeApplicationService
         };
     }
 
-    private static bool IsHomeAvailableForDateRange(Domain.Entities.Home home, DateOnly startDate, DateOnly endDate)
+    private async Task InitializeIntervalTree()
     {
-        if (startDate > endDate)
-            return false;
-
-        for (var date = startDate; date <= endDate; date = date.AddDays(1))
+        var allHomes = await _homeRepository.GetAllAsync();
+        
+        _intervalTree = new IntervalTree();
+        _homesCache = new Dictionary<string, Domain.Entities.Home>();
+        
+        foreach (var home in allHomes)
         {
-            if (!home.IsAvailableOn(date))
+            _homesCache[home.HomeId] = home;
+            
+            var intervals = ConvertToIntervals(home.AvailableSlots, home.HomeId);
+            
+            foreach (var interval in intervals)
             {
-                return false;
+                _intervalTree.Insert(interval);
             }
         }
         
-        return true;
+        _isTreeInitialized = true;
+    }
+
+    private static List<Interval> ConvertToIntervals(List<DateOnly> availableDates, string homeId)
+    {
+        if (!availableDates.Any())
+            return new List<Interval>();
+
+        var sortedDates = availableDates.OrderBy(d => d).ToList();
+        var intervals = new List<Interval>();
+        
+        var currentStart = sortedDates[0];
+        var currentEnd = sortedDates[0];
+        
+        for (int i = 1; i < sortedDates.Count; i++)
+        {
+            if (sortedDates[i] == currentEnd.AddDays(1))
+            {
+                currentEnd = sortedDates[i];
+            }
+            else
+            {
+                intervals.Add(new Interval(currentStart, currentEnd, homeId));
+                
+                currentStart = sortedDates[i];
+                currentEnd = sortedDates[i];
+            }
+        }
+        
+        intervals.Add(new Interval(currentStart, currentEnd, homeId));
+        
+        return intervals;
     }
 
     private static HomeDto MapToDto(Domain.Entities.Home home)

@@ -16,7 +16,7 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
-        services.AddScoped<IHomeApplicationService, HomeApplicationService>();
+        services.AddSingleton<IHomeApplicationService, HomeApplicationService>();
 
         return services;
     }
