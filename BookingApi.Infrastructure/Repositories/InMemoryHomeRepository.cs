@@ -35,9 +35,9 @@ public class InMemoryHomeRepository : IHomeRepository
             "Home 2",
             new List<DateOnly>
             {
+                new DateOnly(2025, 7, 16),
                 new DateOnly(2025, 7, 17),
-                new DateOnly(2025, 7, 18),
-                new DateOnly(2025, 7, 19)
+                new DateOnly(2025, 7, 18)
             });
 
         var home3 = new Home(
@@ -45,9 +45,9 @@ public class InMemoryHomeRepository : IHomeRepository
             "Home 3",
             new List<DateOnly>
             {
-                new DateOnly(2025, 7, 20),
-                new DateOnly(2025, 7, 21),
-                new DateOnly(2025, 7, 22)
+                new DateOnly(2025, 7, 17),
+                new DateOnly(2025, 7, 18),
+                new DateOnly(2025, 7, 19)
             });
 
         _homes.AddRange(new[] { home1, home2, home3 });

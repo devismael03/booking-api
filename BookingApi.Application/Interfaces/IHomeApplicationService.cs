@@ -4,5 +4,5 @@ namespace BookingApi.Application.Interfaces;
 
 public interface IHomeApplicationService
 {
-    Task<AvailableHomesResponseDto> GetAvailableHomesAsync();
+    Task<AvailableHomesResponseDto> GetAvailableHomesAsync(DateOnly startDate, DateOnly endDate);
 }
